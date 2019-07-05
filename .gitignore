@@ -1,0 +1,8 @@
+*.pyc
+.cache
+*config.py
+*config.ini
+gitmsg.gitcommit
+.pytest_cache
+logs
+private
