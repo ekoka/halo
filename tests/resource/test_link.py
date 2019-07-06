@@ -83,3 +83,9 @@ def test_l_aliases_to_link():
     end = 'foo+and+bar'
     r.l('abc', start, quote=True, quote_plus=True) 
     assert r.document['_links']['abc']['href']==end
+
+def test_can_chain_link_methods():
+    r = Resource()
+    r.l('first', 'foo').l('second', 'bar')
+    links = r.document['_links']
+    assert links['first']['href']=='foo' and links['second']['href']=='bar'
