@@ -102,3 +102,8 @@ def test_can_chain_link_methods():
     r.l('first', 'foo').l('second', 'bar')
     links = r.document['_links']
     assert links['first'][0]['href']=='foo' and links['second'][0]['href']=='bar'
+
+def test_returns_link_if_no_uri():
+    r = Resource()
+    r.l('first', 'foo').l('second', 'bar')
+    assert r.link('first')[0]['href']=='foo' and r.link('second')[0]['href']=='bar'
