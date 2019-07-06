@@ -15,12 +15,11 @@ class Resource:
         self.document = document
 
     def _process_link(self, uri, **kw):
-        # unless `unquote` is explicitly set to False
-        # unquote any url.
+        # unless `unquote` is explicitly set to False unquote all urls.
         if kw.get('unquote') is not False:
             kw['unquote'] = True
 
-        # unquote_plus  supersedes unquote
+        # unquote_plus supersedes unquote
         for q in ['unquote_plus', 'unquote']:
             if kw.get(q):
                 uri = getattr(parse, q)(uri)
@@ -32,15 +31,19 @@ class Resource:
                 break
         return uri.lower()
 
-    # links
-    def link(self, name, uri, templated=False, **kw):# quote=False, unquote=False):
+    # link
+    def link(self, name, uri=None, templated=False, **kw):
+        links = self.document.setdefault('_links', {}).setdefault(name, [])
+
+        if uri is None:
+            return links
 
         link = {'href':self._process_link(uri, **kw)}
         if templated:
             link['templated'] = templated
-        links = self.document.setdefault('_links', {})
-        links[name] = link
+        links.append(link)
         return self
+
 
     # alias l to link
     l = link
