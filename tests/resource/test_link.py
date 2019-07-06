@@ -13,12 +13,6 @@ def test_link_properly_set_in_document():
     r.link('abc', abc)
     assert r.document['_links']['abc']['href']==abc
 
-def test_link_lower_cased():
-    r = Resource()
-    abc = 'FU/baR/baz%2A'
-    r.link('abc', abc)
-    assert r.document['_links']['abc']['href']==abc.lower()
-
 def test_link_can_be_quoted():
     r = Resource()
     unquoted = 'foo and bar/{baz}'
@@ -26,12 +20,25 @@ def test_link_can_be_quoted():
     r.link('abc', unquoted, quote=True)
     assert r.document['_links']['abc']['href']==quoted
 
-def test_link_can_be_unquoted():
+def test_url_unquoted_by_default():
     r = Resource()
-    quoted = 'foo%20and%20bar/%7bbaz%7d'
-    unquoted = 'foo and bar/{baz}'
-    r.link('abc', quoted, unquote=True)
-    assert r.document['_links']['abc']['href']==unquoted
+    start = 'foo%20and%20bar'
+    end = 'foo and bar'
+    r.l('abc', start) 
+    assert r.document['_links']['abc']['href']==end
+
+def test_url_not_unquoted_if_explicitly_disabled():
+    r = Resource()
+    start = 'foo%20and%20bar'
+    end = 'foo%20and%20bar'
+    r.l('abc', start, unquote=False) 
+    assert r.document['_links']['abc']['href']==end
+
+def test_all_link_characters_lowercased():
+    r = Resource()
+    abc = 'FU/baR/baz%2A'
+    r.link('abc', abc, unquote=False)
+    assert r.document['_links']['abc']['href']==abc.lower()
 
 def test_link_can_quote_space_to_plus():
     r = Resource()

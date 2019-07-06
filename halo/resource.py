@@ -15,6 +15,11 @@ class Resource:
         self.document = document
 
     def _process_link(self, uri, **kw):
+        # unless `unquote` is explicitly set to False
+        # unquote any url.
+        if kw.get('unquote') is not False:
+            kw['unquote'] = True
+
         # unquote_plus  supersedes unquote
         for q in ['unquote_plus', 'unquote']:
             if kw.get(q):
