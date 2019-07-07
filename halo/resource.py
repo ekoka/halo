@@ -84,6 +84,20 @@ class Resource:
 
         return self
 
+    def prop(self, name, value):
+        if name in ['_links', '_embedded']:
+            raise ValueError("'{}' is a HAL reserved name".format(name))
+        self.document[name] = value
+        return self
+
+    def delprop(self, name):
+        if name in ['_links', '_embedded']:
+            raise ValueError("'{}' is a HAL reserved name".format(name))
+        try:
+            return self.document.pop(name)
+        except KeyError:
+            pass
+
     #TODO: remove a curie
 
     # aliases

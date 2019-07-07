@@ -1,4 +1,3 @@
-import pytest
 from halo.resource import URIQuote
 
 def test_can_quote_uri():
@@ -36,7 +35,7 @@ def test_URIQuote_chainable():
     result = 'foo/bar and baz%20'
     assert urq.q('foo').q('/bar').uq('%20').q('and').uq('%20').q('baz ').uri==result
 
-def test_URIQuote_uri_does_not_mutate():
+def test_URIQuote_uri_string_not_mutated():
     urq1 = URIQuote('abc')
     urq2 = urq1.q('/def')
     urq3 = urq2.q('/ghi')
