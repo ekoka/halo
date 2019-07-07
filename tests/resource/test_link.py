@@ -39,6 +39,34 @@ def test_can_set_media_type():
     r.link('abc', uri, media_type=mt)
     assert r.document['_links']['abc'][0]['type']==mt
 
+def test_can_set_hreflang():
+    r = Resource()
+    uri = 'foo+and+bar+{bar}'
+    lang = 'fr'
+    r.link('abc', uri, hreflang=lang)
+    assert r.document['_links']['abc'][0]['hreflang']==lang
+
+def test_can_set_title():
+    r = Resource()
+    uri = 'foo+and+bar+{bar}'
+    title = 'this title'
+    r.link('abc', uri, title=title)
+    assert r.document['_links']['abc'][0]['title']==title
+
+def test_can_set_profile():
+    r = Resource()
+    uri = 'foo+and+bar+{bar}'
+    profile = 'some profile'
+    r.link('abc', uri, profile=profile)
+    assert r.document['_links']['abc'][0]['profile']==profile
+
+def test_can_set_deprecation():
+    r = Resource()
+    uri = 'foo+and+bar+{bar}'
+    deprecation = 'deprecated in 2020'
+    r.link('abc', uri, deprecation=deprecation)
+    assert r.document['_links']['abc'][0]['deprecation']==deprecation
+
 def test_l_aliases_to_link():
     r = Resource()
     uri = 'foo and bar'

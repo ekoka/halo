@@ -52,9 +52,12 @@ class Resource:
         link = {'href':uri.lower()}
         if templated is not None: 
             link['templated'] = (templated is True) or False 
-
         if media_type is not None:
             link['type'] = media_type
+
+        for k in ['hreflang', 'title', 'profile', 'deprecation']:
+            if kw.get(k) is not None:
+                link[k] = kw[k]
 
         links.append(link)
         return self
@@ -81,6 +84,7 @@ class Resource:
 
         return self
 
+    #TODO: remove a curie
 
     # aliases
     l = link
