@@ -1,3 +1,4 @@
+import pytest
 from halo.resource import Resource
 
 def test_can_create_resource_without_document():
@@ -107,3 +108,48 @@ def test_returns_link_if_no_uri():
     r = Resource()
     r.l('first', 'foo').l('second', 'bar')
     assert r.link('first')[0]['href']=='foo' and r.link('second')[0]['href']=='bar'
+
+def test_can_add_curie():
+    r = Resource()
+    r.curie('first', 'foo/{ref}')
+    curies = r.document['_links']['curies']
+    assert curies[0]['name']=='first'
+    assert curies[0]['href']=='foo/{ref}'
+
+def test_curie_without_ref_raises_exc():
+    r = Resource()
+    with pytest.raises(ValueError) as e:
+        r.curie('first', 'foo')
+        assert e.value=="Missing '{ref}' placeholder in uri string."
+
+def test_strict_param_set_to_False_suppresses_curie_missing_ref_exception():
+    r = Resource()
+    r.curie('first', 'foo', strict=False)
+    curies = r.document['_links']['curies']
+    assert curies[0]['name']=='first'
+    assert curies[0]['href']=='foo'
+
+def test_curie_templated(): 
+    r = Resource()
+    r.curie('first', 'foo',strict=False)
+    curies = r.document['_links']['curies']
+    assert curies[0]['templated'] is True
+
+def test_c_aliases_to_curie():
+    r = Resource()
+    r.c('first', 'foo', strict=False)
+    curies = r.document['_links']['curies']
+    assert curies[0]['name']=='first'
+    assert curies[0]['href']=='foo'
+
+def test_can_retrieve_curie_by_name():
+    r = Resource()
+    r.c('first', 'foo', strict=False)
+    assert r.c('first')['name']=='first'
+    assert r.c('first')['href']=='foo'
+
+def test_curie_chainable(): 
+    r = Resource()
+    r.c('first', 'foo', strict=False).c('second', 'bar/{ref}')
+    assert r.c('first')['href']=='foo' and r.c('second')['href']=='bar/{ref}'
+

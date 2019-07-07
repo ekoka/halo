@@ -44,6 +44,26 @@ class Resource:
         links.append(link)
         return self
 
+    def curie(self, name, uri=None, **kw):
+        curies = self.link('curies')
+        try:
+            curie = [c for c in curies if c['name']==name][0]
+        except IndexError:
+            curie = {'name': name, 'templated':True}
+            curies.append(curie)
+        
+        if uri is None:
+            return curie
+        href = self._process_link(uri, **kw)
+        if '{ref}' not in href and kw.get('strict') is True:
+            raise ValueError("Missing '{ref}' placeholder in uri string.")
+        curie['href'] = self._process_link(uri, **kw)
 
-    # alias l to link
+        return self
+
+
+
+    # aliases
     l = link
+    c = curie
+
