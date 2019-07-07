@@ -43,23 +43,23 @@ class Resource:
             "'Resource' object has no attribute '{}'".format(attr))
 
     # link
-    def link(self, name, uri=None, templated=False, media_type=None, **kw):
-        links = self.document.setdefault('_links', {}).setdefault(name, [])
+    def link(self, link, uri=None, templated=False, media_type=None, **kw):
+        links = self.document.setdefault('_links', {}).setdefault(link, [])
 
         if uri is None:
             return links
 
-        link = {'href':uri.lower()}
+        linkitem = {'href':uri.lower()}
         if templated is not None: 
-            link['templated'] = (templated is True) or False 
+            linkitem['templated'] = (templated is True) or False 
         if media_type is not None:
-            link['type'] = media_type
+            linkitem['type'] = media_type
 
-        for k in ['hreflang', 'title', 'profile', 'deprecation']:
+        for k in ['name', 'hreflang', 'title', 'profile', 'deprecation']:
             if kw.get(k) is not None:
-                link[k] = kw[k]
+                linkitem[k] = kw[k]
 
-        links.append(link)
+        links.append(linkitem)
         return self
 
     #TODO: remove a link

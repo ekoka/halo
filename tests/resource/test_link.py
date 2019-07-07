@@ -22,56 +22,63 @@ def test_link_properly_set_in_document():
 
 def test_templated_flag_can_be_set():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
-    r.link('abc', uri, templated=True)
+    href = 'foo+and+bar+{bar}'
+    r.link('abc', href, templated=True)
     assert r.document['_links']['abc'][0]['templated'] is True
 
 def test_templated_flag_is_either_True_or_False():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
-    r.link('abc', uri, templated='whatever')
+    href = 'foo+and+bar+{bar}'
+    r.link('abc', href, templated='whatever')
     assert r.document['_links']['abc'][0]['templated'] is False
+
+def test_can_set_name():
+    r = Resource()
+    href = 'foo+and+bar+{bar}'
+    name = 'next'
+    r.link('nav', href, name=name)
+    assert r.document['_links']['nav'][0]['name']==name
 
 def test_can_set_media_type():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
+    href = 'foo+and+bar+{bar}'
     mt = 'fubar'
-    r.link('abc', uri, media_type=mt)
+    r.link('abc', href, media_type=mt)
     assert r.document['_links']['abc'][0]['type']==mt
 
 def test_can_set_hreflang():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
+    href = 'foo+and+bar+{bar}'
     lang = 'fr'
-    r.link('abc', uri, hreflang=lang)
+    r.link('abc', href, hreflang=lang)
     assert r.document['_links']['abc'][0]['hreflang']==lang
 
 def test_can_set_title():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
+    href = 'foo+and+bar+{bar}'
     title = 'this title'
-    r.link('abc', uri, title=title)
+    r.link('abc', href, title=title)
     assert r.document['_links']['abc'][0]['title']==title
 
 def test_can_set_profile():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
+    href = 'foo+and+bar+{bar}'
     profile = 'some profile'
-    r.link('abc', uri, profile=profile)
+    r.link('abc', href, profile=profile)
     assert r.document['_links']['abc'][0]['profile']==profile
 
 def test_can_set_deprecation():
     r = Resource()
-    uri = 'foo+and+bar+{bar}'
+    href = 'foo+and+bar+{bar}'
     deprecation = 'deprecated in 2020'
-    r.link('abc', uri, deprecation=deprecation)
+    r.link('abc', href, deprecation=deprecation)
     assert r.document['_links']['abc'][0]['deprecation']==deprecation
 
 def test_l_aliases_to_link():
     r = Resource()
-    uri = 'foo and bar'
-    r.l('abc', uri) 
-    assert r.document['_links']['abc'][0]['href']==uri
+    href = 'foo and bar'
+    r.l('abc', href) 
+    assert r.document['_links']['abc'][0]['href']==href
 
 def test_can_chain_link_methods():
     r = Resource()
@@ -79,7 +86,7 @@ def test_can_chain_link_methods():
     links = r.document['_links']
     assert links['first'][0]['href']=='foo' and links['second'][0]['href']=='bar'
 
-def test_returns_link_if_no_uri():
+def test_returns_link_if_no_href():
     r = Resource()
     r.l('first', 'foo').l('second', 'bar')
     assert r.link('first')[0]['href']=='foo' and r.link('second')[0]['href']=='bar'
@@ -130,6 +137,6 @@ def test_curie_chainable():
 
 def test_Resource_can_proxy_to_URIQuote():
     r = Resource()
-    uri = r.quote('first and last')
-    assert uri.uri=='first%20and%20last'
+    urq = r.quote('first and last')
+    assert urq.uri=='first%20and%20last'
 
