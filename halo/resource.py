@@ -43,17 +43,24 @@ class Resource:
             "'Resource' object has no attribute '{}'".format(attr))
 
     # link
-    def link(self, name, uri=None, templated=False, **kw):
+    def link(self, name, uri=None, templated=False, media_type=None, **kw):
         links = self.document.setdefault('_links', {}).setdefault(name, [])
 
         if uri is None:
             return links
 
         link = {'href':uri.lower()}
-        if templated:
-            link['templated'] = templated
+        if templated is not None: 
+            link['templated'] = (templated is True) or False 
+
+        if media_type is not None:
+            link['type'] = media_type
+
         links.append(link)
         return self
+
+    #TODO: remove a link
+    #TODO: replace a link
 
     def curie(self, name, uri=None, **kw):
         if kw.get('strict') is None:

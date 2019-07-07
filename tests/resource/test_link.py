@@ -20,11 +20,24 @@ def test_link_properly_set_in_document():
     r.link('abc', abc)
     assert r.document['_links']['abc'][0]['href']==abc
 
-def test_link_can_be_marked_as_templated():
+def test_templated_flag_can_be_set():
     r = Resource()
     uri = 'foo+and+bar+{bar}'
     r.link('abc', uri, templated=True)
     assert r.document['_links']['abc'][0]['templated'] is True
+
+def test_templated_flag_is_either_True_or_False():
+    r = Resource()
+    uri = 'foo+and+bar+{bar}'
+    r.link('abc', uri, templated='whatever')
+    assert r.document['_links']['abc'][0]['templated'] is False
+
+def test_can_set_media_type():
+    r = Resource()
+    uri = 'foo+and+bar+{bar}'
+    mt = 'fubar'
+    r.link('abc', uri, media_type=mt)
+    assert r.document['_links']['abc'][0]['type']==mt
 
 def test_l_aliases_to_link():
     r = Resource()
