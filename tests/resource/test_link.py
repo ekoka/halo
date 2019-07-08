@@ -89,7 +89,28 @@ def test_can_chain_link_methods():
 def test_returns_link_if_no_href():
     r = Resource()
     r.l('first', 'foo').l('second', 'bar')
-    assert r.link('first')[0]['href']=='foo' and r.link('second')[0]['href']=='bar'
+    assert r.getlink('first')[0]['href']=='foo' 
+    assert r.getlink('second')[0]['href']=='bar'
+
+def test_can_filter_returned_link_by_name():
+    r = Resource()
+    r.l('nav', '/page/1', name='first').l('nav', '/page/2', name='next')
+    assert r.getlink('nav', name='first')['href']=='/page/1' 
+    assert r.getlink('nav', name='next')['href']=='/page/2'
+
+def test_raise_error_if_link_not_found():
+    r = Resource()
+    r.l('nav', '/page/1', name='first').l('nav', '/page/2', name='next')
+    with pytest.raises(KeyError) as e:
+        r.getlink('foo')
+    assert 'link in document' in str(e.value).lower()
+
+def test_raise_error_if_name_not_found_in_existing_link():
+    r = Resource()
+    r.l('nav', '/page/1', name='first').l('nav', '/page/2', name='next')
+    with pytest.raises(KeyError) as e:
+        r.getlink('nav', name='last')
+    assert 'no link item' in str(e.value).lower()
 
 def test_can_add_curie():
     r = Resource()
@@ -127,13 +148,14 @@ def test_c_aliases_to_curie():
 def test_can_retrieve_curie_by_name():
     r = Resource()
     r.c('first', 'foo', strict=False)
-    assert r.c('first')['name']=='first'
-    assert r.c('first')['href']=='foo'
+    assert r.getc('first')['name']=='first'
+    assert r.getc('first')['href']=='foo'
 
 def test_curie_chainable(): 
     r = Resource()
     r.c('first', 'foo', strict=False).c('second', 'bar/{ref}')
-    assert r.c('first')['href']=='foo' and r.c('second')['href']=='bar/{ref}'
+    assert r.getc('first')['href']=='foo' 
+    assert r.getc('second')['href']=='bar/{ref}'
 
 def test_Resource_can_proxy_to_URIQuote():
     r = Resource()
