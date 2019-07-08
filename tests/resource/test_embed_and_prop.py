@@ -11,12 +11,12 @@ def test_can_return_property():
     name = 'bar'
     r = Resource()
     r.prop(name, 'foo')
-    assert r.prop(name)=='foo'
+    assert r.getprop(name)=='foo'
 
 def test_return_undefined_property_raise_error():
     r = Resource()
     with pytest.raises(KeyError) as e:
-        r.prop('foo')
+        r.getprop('foo')
     assert 'not set' in str(e.value).lower()
 
 def test_add_reserved_properties_raise_error():
@@ -62,7 +62,7 @@ def test_can_return_embedded_document():
     r2.link('abc', 'def')
     r2.prop('foo', 'bar')
     r1.embed('r2', r2)
-    assert r1.embed('r2')[0] is r2.document
+    assert r1.getembed('r2')[0] is r2.document
 
 def test_can_delete_embedded():
     r1 = Resource()

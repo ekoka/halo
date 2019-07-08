@@ -103,17 +103,17 @@ class Resource:
                 return c
         raise KeyError("No curie with name '{}'".format(name))
 
-    def prop(self, name, value=_undef):
+    def prop(self, name, value=None):
         if name in ['_links', '_embedded']:
             raise ValueError("'{}' is a HAL reserved name".format(name))
-
-        if value is _undef:
-            try:
-                return self.document[name]
-            except KeyError:
-                raise KeyError("Property '{}' not set on document".format(name))
         self.document[name] = value
         return self
+
+    def getprop(self, name):
+        try:
+            return self.document[name]
+        except KeyError:
+            raise KeyError("Property '{}' not set on document".format(name))
 
     def delprop(self, name):
         if name in ['_links', '_embedded']:
@@ -124,18 +124,19 @@ class Resource:
             pass
         return self
 
-    def embed(self, name, document=_undef):
+    def embed(self, name, document):
         res = self.document.setdefault('_embedded', {}).setdefault(name, [])
-        if document is _undef:
-            try:
-                return self.document['_embedded'][name]
-            except KeyError:
-                raise KeyError(
-                    "Embedded resource '{}' not set on document".format(name))
         if isinstance(document, Resource):
             document = document.document
         res.append(document)
         return self
+
+    def getembed(self, name):
+        try:
+            return self.document['_embedded'][name]
+        except KeyError:
+            raise KeyError(
+                "Embedded resource '{}' not set on document".format(name))
 
     def delembed(self, name):
         try:
