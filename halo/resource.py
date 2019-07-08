@@ -2,26 +2,30 @@ from urllib import parse
 
 _undef = object()
 
-class URIQuote:
+class URIEncode:
     def __init__(self, uri=''):
         self.uri = uri.lower()
 
-    def quote(self, uri):
-        return URIQuote(self.uri + parse.quote(uri))
+    def plain(self, uri):
+        return URIEncode(self.uri + uri)
 
-    def unquote(self, uri):
-        return URIQuote(self.uri + parse.unquote(uri))
+    def encode(self, uri):
+        return URIEncode(self.uri + parse.quote(uri))
 
-    def unquote_plus(self, uri):
-        return URIQuote(self.uri + parse.unquote_plus(uri))
+    def decode(self, uri):
+        return URIEncode(self.uri + parse.unquote(uri))
 
-    def quote_plus(self, uri):
-        return URIQuote(self.uri + parse.quote_plus(uri))
+    def decode_plus(self, uri):
+        return URIEncode(self.uri + parse.unquote_plus(uri))
 
-    q=quote
-    uq=unquote
-    uqp=unquote_plus
-    qp=quote_plus
+    def encode_plus(self, uri):
+        return URIEncode(self.uri + parse.quote_plus(uri))
+
+    pln=plain
+    enc=encode
+    dec=decode
+    decp=decode_plus
+    encp=encode_plus
 
 
 class Resource:
@@ -39,8 +43,8 @@ class Resource:
         self.document = document
 
     def __getattr__(self, attr):
-        if attr in URIQuote.__dict__:
-            return getattr(URIQuote(), attr) 
+        if attr in URIEncode.__dict__:
+            return getattr(URIEncode(), attr) 
         raise AttributeError(
             "'Resource' object has no attribute '{}'".format(attr))
 

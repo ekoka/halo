@@ -193,8 +193,8 @@ def test_can_chain_curie_deletion():
     r.ac('first', 'foo', strict=False).ac('second', 'bar/{ref}')
     assert len(r.dc('first').dc('second').curies) == 0
 
-def test_Resource_can_proxy_to_URIQuote():
+def test_Resource_can_proxy_to_URIEncode():
     r = Resource()
-    urq = r.quote('first and last')
-    assert urq.uri=='first%20and%20last'
+    urc = r.encode('first and last')
+    assert urc.uri=='first%20and%20last'
 

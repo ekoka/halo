@@ -1,45 +1,49 @@
-from halo.resource import URIQuote
+from halo.resource import URIEncode
 
-def test_can_quote_uri():
-    urq = URIQuote()
-    unquoted = 'foo and bar/{baz}'
-    quoted = 'foo%20and%20bar/%7bbaz%7d'
-    assert urq.q(unquoted).uri==quoted
+def test_can_encode_uri():
+    urq = URIEncode()
+    decoded = 'foo and bar/{baz}'
+    encoded = 'foo%20and%20bar/%7bbaz%7d'
+    assert urq.enc(decoded).uri==encoded
 
-def test_can_unquote_uri():
-    urq = URIQuote()
-    unquoted = 'foo and bar/{baz}'
-    quoted = 'foo%20and%20bar/%7bbaz%7d'
-    assert urq.uq(quoted).uri==unquoted
+def test_can_accept_plain_strings():
+    ur = URIEncode('abc')
+    assert ur.plain(': and :').uri =='abc: and :'
+
+def test_can_decode_uri():
+    urq = URIEncode()
+    decoded = 'foo and bar/{baz}'
+    encoded = 'foo%20and%20bar/%7bbaz%7d'
+    assert urq.dec(encoded).uri==decoded
 
 def test_uri_normalized_to_lowercase():
-    quoted = 'FU/baR/baz%2A'
-    unquoted = 'FU/baR/baz*'
-    assert URIQuote(quoted).uri==quoted.lower()
-    assert URIQuote().uq(quoted).uri==unquoted.lower()
+    encoded = 'FU/baR/baz%2A'
+    decoded = 'FU/baR/baz*'
+    assert URIEncode(encoded).uri==encoded.lower()
+    assert URIEncode().dec(encoded).uri==decoded.lower()
 
-def test_can_quote_space_to_plus():
-    urq = URIQuote()
-    unquoted = 'foo and bar'
-    quoted = 'foo+and+bar'
-    assert urq.qp(unquoted).uri==quoted
+def test_can_encode_space_to_plus():
+    urq = URIEncode()
+    decoded = 'foo and bar'
+    encoded = 'foo+and+bar'
+    assert urq.encp(decoded).uri==encoded
 
-def test_can_unquote_plus_to_space():
-    urq = URIQuote()
-    quoted = 'foo+and+bar'
-    unquoted = 'foo and bar'
-    assert urq.uqp(quoted).uri==unquoted
+def test_can_decode_plus_to_space():
+    urq = URIEncode()
+    encoded = 'foo+and+bar'
+    decoded = 'foo and bar'
+    assert urq.decp(encoded).uri==decoded
 
-def test_URIQuote_chainable():
-    urq = URIQuote()
+def test_URIEncode_chainable():
+    urq = URIEncode()
     result = 'foo/bar and baz%20'
-    assert urq.q('foo').q('/bar').uq('%20').q('and').uq('%20').q('baz ').uri==result
+    assert urq.enc('foo').enc('/bar').dec('%20').enc('and').dec('%20').enc('baz ').uri==result
 
-def test_URIQuote_uri_string_not_mutated():
-    urq1 = URIQuote('abc')
-    urq2 = urq1.q('/def')
-    urq3 = urq2.q('/ghi')
-    urq4 = urq1.q('/jkl')
+def test_URIEncode_uri_string_not_mutated():
+    urq1 = URIEncode('abc')
+    urq2 = urq1.enc('/def')
+    urq3 = urq2.enc('/ghi')
+    urq4 = urq1.enc('/jkl')
     assert urq1.uri=='abc'
     assert urq2.uri=='abc/def'
     assert urq3.uri=='abc/def/ghi'
