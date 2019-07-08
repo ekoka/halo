@@ -11,110 +11,128 @@ def test_resource_given_default_document():
 def test_link_set_as_tuple_in_document():
     r = Resource()
     abc = 'http://someurl.com/foo/bar'
-    r.link('abc', abc)
+    r.addlink('abc', abc)
     assert r.document['_links']['abc'][0]['href']==abc
 
 def test_link_properly_set_in_document():
     r = Resource()
     abc = 'http://someurl.com/foo/bar'
-    r.link('abc', abc)
+    r.addlink('abc', abc)
     assert r.document['_links']['abc'][0]['href']==abc
+
+def test_can_access_links_object_through_property():
+    r = Resource()
+    abc = 'http://someurl.com/foo/bar'
+    r.addlink('abc', abc)
+    assert r.links is r.document['_links']
 
 def test_templated_flag_can_be_set():
     r = Resource()
     href = 'foo+and+bar+{bar}'
-    r.link('abc', href, templated=True)
+    r.addlink('abc', href, templated=True)
     assert r.document['_links']['abc'][0]['templated'] is True
 
 def test_templated_flag_is_either_True_or_False():
     r = Resource()
     href = 'foo+and+bar+{bar}'
-    r.link('abc', href, templated='whatever')
+    r.addlink('abc', href, templated='whatever')
     assert r.document['_links']['abc'][0]['templated'] is False
 
 def test_can_set_name():
     r = Resource()
     href = 'foo+and+bar+{bar}'
     name = 'next'
-    r.link('nav', href, name=name)
+    r.addlink('nav', href, name=name)
     assert r.document['_links']['nav'][0]['name']==name
 
 def test_can_set_media_type():
     r = Resource()
     href = 'foo+and+bar+{bar}'
     mt = 'fubar'
-    r.link('abc', href, media_type=mt)
+    r.addlink('abc', href, media_type=mt)
     assert r.document['_links']['abc'][0]['type']==mt
 
 def test_can_set_hreflang():
     r = Resource()
     href = 'foo+and+bar+{bar}'
     lang = 'fr'
-    r.link('abc', href, hreflang=lang)
+    r.addlink('abc', href, hreflang=lang)
     assert r.document['_links']['abc'][0]['hreflang']==lang
 
 def test_can_set_title():
     r = Resource()
     href = 'foo+and+bar+{bar}'
     title = 'this title'
-    r.link('abc', href, title=title)
+    r.addlink('abc', href, title=title)
     assert r.document['_links']['abc'][0]['title']==title
 
 def test_can_set_profile():
     r = Resource()
     href = 'foo+and+bar+{bar}'
     profile = 'some profile'
-    r.link('abc', href, profile=profile)
+    r.addlink('abc', href, profile=profile)
     assert r.document['_links']['abc'][0]['profile']==profile
 
 def test_can_set_deprecation():
     r = Resource()
     href = 'foo+and+bar+{bar}'
     deprecation = 'deprecated in 2020'
-    r.link('abc', href, deprecation=deprecation)
+    r.addlink('abc', href, deprecation=deprecation)
     assert r.document['_links']['abc'][0]['deprecation']==deprecation
 
-def test_l_aliases_to_link():
+def test_al_aliases_to_link():
     r = Resource()
     href = 'foo and bar'
-    r.l('abc', href) 
+    r.al('abc', href) 
     assert r.document['_links']['abc'][0]['href']==href
 
 def test_can_chain_link_methods():
     r = Resource()
-    r.l('first', 'foo').l('second', 'bar')
+    r.al('first', 'foo').al('second', 'bar')
     links = r.document['_links']
     assert links['first'][0]['href']=='foo' and links['second'][0]['href']=='bar'
 
-def test_returns_link_if_no_href():
+def test_can_return_link():
     r = Resource()
-    r.l('first', 'foo').l('second', 'bar')
+    r.al('first', 'foo').al('second', 'bar')
     assert r.getlink('first')[0]['href']=='foo' 
     assert r.getlink('second')[0]['href']=='bar'
 
 def test_can_filter_returned_link_by_name():
     r = Resource()
-    r.l('nav', '/page/1', name='first').l('nav', '/page/2', name='next')
+    r.al('nav', '/page/1', name='first').al('nav', '/page/2', name='next')
     assert r.getlink('nav', name='first')['href']=='/page/1' 
     assert r.getlink('nav', name='next')['href']=='/page/2'
 
 def test_raise_error_if_link_not_found():
     r = Resource()
-    r.l('nav', '/page/1', name='first').l('nav', '/page/2', name='next')
+    r.al('nav', '/page/1', name='first').al('nav', '/page/2', name='next')
     with pytest.raises(KeyError) as e:
         r.getlink('foo')
-    assert 'link in document' in str(e.value).lower()
+    assert 'not found' in str(e.value).lower()
 
 def test_raise_error_if_name_not_found_in_existing_link():
     r = Resource()
-    r.l('nav', '/page/1', name='first').l('nav', '/page/2', name='next')
+    r.al('nav', '/page/1', name='first').al('nav', '/page/2', name='next')
     with pytest.raises(KeyError) as e:
         r.getlink('nav', name='last')
-    assert 'no link item' in str(e.value).lower()
+    assert 'not found' in str(e.value).lower()
+
+def test_can_delete_link_collection():
+    r = Resource()
+    r.al('nav', '/page/1', name='first').al('nav', '/page/2', name='next')
+    r.dellink('nav')
+    assert 'nav' not in r.document['_links']
+
+def test_can_delete_named_item_in_link_collection():
+    r = Resource()
+    r.al('nav', '/page/1', name='first').al('nav', '/page/2', name='next')
+    r.dellink('nav', name='first')
+    assert r.document['_links']['nav'][0]['name']=='next'
 
 def test_can_add_curie():
     r = Resource()
-    r.curie('first', 'foo/{ref}')
+    r.addcurie('first', 'foo/{ref}')
     curies = r.document['_links']['curies']
     assert curies[0]['name']=='first'
     assert curies[0]['href']=='foo/{ref}'
@@ -122,40 +140,58 @@ def test_can_add_curie():
 def test_curie_without_ref_raises_exc():
     r = Resource()
     with pytest.raises(ValueError) as e:
-        r.curie('first', 'foo')
+        r.ac('first', 'foo')
     assert str(e.value)=="Missing '{ref}' placeholder in uri string."
 
 def test_strict_param_set_to_False_suppresses_curie_missing_ref_exception():
     r = Resource()
-    r.curie('first', 'foo', strict=False)
+    r.ac('first', 'foo', strict=False)
     curies = r.document['_links']['curies']
     assert curies[0]['name']=='first'
     assert curies[0]['href']=='foo'
 
 def test_curie_templated_flag_set(): 
     r = Resource()
-    r.curie('first', 'foo',strict=False)
+    r.ac('first', 'foo',strict=False)
     curies = r.document['_links']['curies']
     assert curies[0]['templated'] is True
 
 def test_c_aliases_to_curie():
     r = Resource()
-    r.c('first', 'foo', strict=False)
+    r.ac('first', 'foo', strict=False)
     curies = r.document['_links']['curies']
     assert curies[0]['name']=='first'
     assert curies[0]['href']=='foo'
 
 def test_can_retrieve_curie_by_name():
     r = Resource()
-    r.c('first', 'foo', strict=False)
-    assert r.getc('first')['name']=='first'
-    assert r.getc('first')['href']=='foo'
+    r.ac('first', 'foo', strict=False)
+    assert r.gc('first')['name']=='first'
+    assert r.gc('first')['href']=='foo'
 
 def test_curie_chainable(): 
     r = Resource()
-    r.c('first', 'foo', strict=False).c('second', 'bar/{ref}')
-    assert r.getc('first')['href']=='foo' 
-    assert r.getc('second')['href']=='bar/{ref}'
+    r.ac('first', 'foo', strict=False).ac('second', 'bar/{ref}')
+    assert r.gc('first')['href']=='foo' 
+    assert r.gc('second')['href']=='bar/{ref}'
+
+def test_can_access_curies_object_through_property():
+    r = Resource()
+    r.ac('first', 'foo', strict=False).ac('second', 'bar/{ref}')
+    r.curies is r.document['_links']['curies']
+
+def test_can_delete_curie():
+    r = Resource()
+    r.ac('first', 'foo', strict=False).ac('second', 'bar/{ref}')
+    r.delcurie('first')
+    with pytest.raises(KeyError) as e:
+        r.gc('first')
+    assert 'not found' in str(e.value).lower()
+ 
+def test_can_chain_curie_deletion():
+    r = Resource()
+    r.ac('first', 'foo', strict=False).ac('second', 'bar/{ref}')
+    assert len(r.dc('first').dc('second').curies) == 0
 
 def test_Resource_can_proxy_to_URIQuote():
     r = Resource()

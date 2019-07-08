@@ -44,20 +44,29 @@ class Resource:
         raise AttributeError(
             "'Resource' object has no attribute '{}'".format(attr))
 
-    # link
-    def link(self, link, uri='', templated=False, media_type=None, **kw):
-        links = self.document.setdefault('_links', {}).setdefault(link, [])
+    @property
+    def links(self):
+        return self.document.setdefault('_links', {})
 
+    @property
+    def curies(self):
+        return self.links.setdefault('curies', [])
+
+    @property
+    def embedded(self):
+        return self.document.setdefault('_embedded', {})
+
+    # link
+    def addlink(self, link, uri='', templated=False, media_type=None, **kw):
+        links = self.links.setdefault(link, [])
         linkitem = {'href':uri.lower()}
         if templated is not None: 
             linkitem['templated'] = (templated is True) or False 
         if media_type is not None:
             linkitem['type'] = media_type
-
         for k in ['name', 'hreflang', 'title', 'profile', 'deprecation']:
             if kw.get(k) is not None:
                 linkitem[k] = kw[k]
-
         links.append(linkitem)
         return self
 
@@ -65,21 +74,23 @@ class Resource:
         try:
             linkitems = self.document['_links'][link]
         except KeyError:
-            raise KeyError("No {} link in document".format(link))
-
+            raise KeyError("Link '{}' not found in document".format(link))
         if name is None:
             return linkitems
         for l in linkitems:
             if l.get('name')==name:
                 return l
-        raise KeyError("No link item with name '{}'".format(name))
+        raise KeyError("Link item with name '{}' not found".format(name))
 
+    def dellink(self, link, name=None):
+        links = self.document.get('_links', {})
+        if name is None:
+            links.pop(link, None)
+        elif links.get(link):
+            links[link] = [l for l in links[link] if l.get('name')!=name]
+        return self
 
-    #TODO: remove a link
-    #TODO: replace a link
-    #TODO: remove a curie
-
-    def curie(self, name, uri='', **kw):
+    def addcurie(self, name, uri='', **kw):
         if kw.get('strict') is None:
             kw['strict'] = True
         curies = self.document.setdefault('_links', {}).setdefault('curies', [])
@@ -88,22 +99,31 @@ class Resource:
         except IndexError:
             curie = {'name': name, 'templated':True}
             curies.append(curie)
-        
         href = uri.lower()
         if '{ref}' not in href and kw.get('strict') is True:
             raise ValueError("Missing '{ref}' placeholder in uri string.")
         curie['href'] = uri.lower()
-
         return self
 
     def getcurie(self, name):
-        curies = self.getlink('curies')
-        for c in curies:
-            if c['name']==name:
-                return c
-        raise KeyError("No curie with name '{}'".format(name))
+        try:
+            curies = self.document['_links']['curies']
+            for c in curies:
+                if c['name']==name:
+                    return c
+        except KeyError:
+            pass
+        raise KeyError("Curie with name '{}' not found".format(name))
 
-    def prop(self, name, value=None):
+    def delcurie(self, name):
+        try:
+            links = self.document['_links']
+            links['curies'] = [c for c in links['curies'] if c['name']!=name]
+        except KeyError:
+            pass
+        return self
+
+    def addprop(self, name, value=None):
         if name in ['_links', '_embedded']:
             raise ValueError("'{}' is a HAL reserved name".format(name))
         self.document[name] = value
@@ -113,7 +133,7 @@ class Resource:
         try:
             return self.document[name]
         except KeyError:
-            raise KeyError("Property '{}' not set on document".format(name))
+            raise KeyError("Property '{}' not found on document".format(name))
 
     def delprop(self, name):
         if name in ['_links', '_embedded']:
@@ -124,33 +144,39 @@ class Resource:
             pass
         return self
 
-    def embed(self, name, document):
+    def addembedded(self, name, document):
         res = self.document.setdefault('_embedded', {}).setdefault(name, [])
         if isinstance(document, Resource):
             document = document.document
         res.append(document)
         return self
 
-    def getembed(self, name):
+    def getembedded(self, name):
         try:
             return self.document['_embedded'][name]
         except KeyError:
             raise KeyError(
-                "Embedded resource '{}' not set on document".format(name))
+                "Embedded resource '{}' not found on document".format(name))
 
-    def delembed(self, name):
+    def delembedded(self, name):
         try:
             self.document['_embedded'].pop(name)
         except KeyError:
             pass
         return self
 
-
-
-
     # aliases
-    l = link
-    c = curie
-    getl = getlink
-    getc = getcurie
+    al = addlink
+    ac = addcurie
+    ae = addembedded
+    ap = addprop
+    gl = getlink
+    gc = getcurie
+    ge = getembedded
+    gp = getprop
+    dl = dellink
+    dc = delcurie
+    de = delembedded
+    dp = delprop
+
 
