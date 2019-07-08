@@ -239,3 +239,58 @@ For convenience, some methods from `Resource` proxy to `URIEncode`'s methods. Th
 
 
 The `URIEncode` class gives you great flexibility in how to structure your resource's URLs, but as you know, with great power comes great responsibility. It's generally not a good idea to mix encoded characters with non-encoded ones. So avoid doing that unless it's absolutely necessary, as it is in the case of URL templates, which use curly braces to delimit the placeholder. Even in such cases you should thoroughly document your URI templates to clarify the steps to take prior to processing the template to generate a URL (e.g. should the template be entirely url-decoded first, or is it served with the placeholder already in its curly brace form, ready to be replaced by a key).
+
+# CURIES
+### Adding CURIES
+
+    r.addcurie('doc', r.enc('http://example.org/doc/api/').pln('{rel}').uri)
+
+- reside as `curies` link within `_links`
+- alias `Resource.ac()`
+- automatically templated
+- raise error if no `{rel}` placeholder in url
+- error can be suppressed by setting `strict=False`
+
+### Getting CURIES
+
+- `Resource.getcurie(name)` or `Resource.gc(name)`
+
+- `Resource.curies` property
+    [
+        {
+            'name': 'doc',
+            'href': 'http%2a//example.org/doc/api/{rel}',
+            templated:True
+        }
+    ]
+
+- raises `KeyError` if not found
+
+### Deleting CURIES
+
+- `Resource.delcurie(name)` or `Resource.dc(name)`
+- method chaining
+
+
+# Embedding other resources
+### Adding embedded resources
+- `Resource.addembedded(rel, <resource or document>)` or `Resource.ae(rel, resource)`
+- method chaining
+### Getting embedded resources
+- `Resource.getembedded(rel)` or `Resource.ge(rel)` 
+- raise KeyError if not found
+### Deleting embedded resources
+- `Resource.delembedded(rel)` or `Resource.de(rel)` 
+- method chaining
+
+# Properties
+### Adding properties
+- `Resource.addprop(key, jsonvalue)` or `Resource.ap(key, jsonvalue)`
+- method chaining
+### Getting properties
+- `Resource.getprop(key)` or `Resource.gp(key)`
+- raise KeyError if not found
+### Deleting properties
+- `Resource.delprop(key)` or `Resource.dp(key)`
+- method chaining
+
