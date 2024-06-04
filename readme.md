@@ -42,16 +42,15 @@ resource.al('next', 'https://example.org/pages/2')
 ```
 Most setter and deleter methods return the same `Resource` instance that invokes them. You can take advantage of this to chain those calls. For example, when adding links:
 ```python
-r = halo.Resource()
-r.al(
-    'users', 'https://example.org/users').al(
-    'products', 'https://example.org/products/73').al(
-    'products', 'https://example.org/products/922').al(
-    'categories', 'https://example.org/categories')
+resource = (halo.Resource()
+    .al('users', 'https://example.org/users')
+    .al('products', 'https://example.org/products/73')
+    .al('products', 'https://example.org/products/922')
+    .al('categories', 'https://example.org/categories'))
 ```
 If you were to look at the document you'd see something like this
 ```python
-print(r.document)
+print(resource.document)
 # {
 #     '_links': {
 #         'users': [
@@ -70,11 +69,10 @@ print(r.document)
 
 Note that normally a relation (e.g. 'users', 'products', 'categories', etc) points to a single link. However, HAL also allows for the possibility of one relation pointing to a collection of links. To provide some consistency when handling links in client applications, HALO always represent them as a collection, whether a link should be considered a single item or otherwise. To differentiate between links that are part of an actual collection, it is recommended to provide them with an additional `name` attribute, that will be used to segregate them, as demonstrated below.
 ```python
-books = halo.Resource()
-books.al(
-    'nav', '/books/1', name='first').al(
-    'nav', '/books/2', name='next').al(
-    'nav', '/books/87', name='last')
+books = (halo.Resource()
+    .al('nav', '/books/1', name='first')
+    .al('nav', '/books/2', name='next')
+    .al('nav', '/books/87', name='last'))
 print(books.document)
 # {
 #     '_links': {
@@ -101,7 +99,7 @@ Details on how to treat links in client applications are left to each API's spec
 ### Retrieving links
 To retrieve a previously set link, call the `getlink(rel)` method or its `gl(rel)` alias, passing the relation as first parameter.
 ```python
-nav = r.gl('nav')
+nav = resource.gl('nav')
 print(nav)
 # [
 #     {
@@ -120,7 +118,7 @@ print(nav)
 ```
 To return only one of the links in a collection based on its `name` attribute, do the same as the above but in addition to the relation, specify the `name` of the link you want:
 ```python
-last = r.gl('nav', name='last')
+last = resource.gl('nav', name='last')
 print(last)
 # {
 #     'name': 'last'
@@ -130,14 +128,14 @@ print(last)
 You can also access a document's `_links` object with the `Resource.links` property, if you need to directly manipulate it.
 
 ```python
-r.document['_links'] is r.links 
+resource.document['_links'] is resource.links 
 # True
 ```
 
 Trying to access a link that is not in the document throws a `KeyError`.
 
 ```python
-r.gl('profile')
+resource.gl('profile')
 # KeyError: Link 'profile' not found in document
 ```
 
@@ -145,13 +143,13 @@ r.gl('profile')
 
 You can delete links with the `dellink(rel)` method or its alias `dl(rel)`. 
 ```python
-r.dl('nav')
+resource.dl('nav')
 ```
 
 To remove only a specific link from the collection, specify its `name` attribute.
 
 ```python
-r.dl('nav', 'next')
+resource.dl('nav', 'next')
 ```
 
 The method is chainable, allowing you to continue operating on the `Resource` instance.
@@ -212,11 +210,11 @@ You can thus chain the construction of your URIs to URL encode or decode as you 
 For convenience, some methods from `Resource` proxy to `URIEncode`'s methods. There are also a number of shorter aliases. In application code this is how you would likely use it
 
     
-    prod_templ = r.enc('http://api.example.com/v1/products/').pln('{product_id}')
+    prod_templ = resource.enc('http://api.example.com/v1/products/').pln('{product_id}')
 
-    r.addlink('product', prod_templ.uri, templated=True)
+    resource.addlink('product', prod_templ.uri, templated=True)
 
-    print(r.links)
+    print(resource.links)
     # {
     #     '_links': {
     #         'product': [
@@ -234,7 +232,7 @@ The `URIEncode` class gives you great flexibility in how to structure your resou
 ## CURIES
 ### Adding CURIES
 
-    r.addcurie('doc', r.enc('http://example.org/doc/api/').pln('{rel}').uri)
+    resource.addcurie('doc', resource.enc('http://example.org/doc/api/').pln('{rel}').uri)
 
 - reside as `curies` link within `_links`
 - alias `Resource.ac()`
@@ -283,4 +281,3 @@ The `URIEncode` class gives you great flexibility in how to structure your resou
 ### Deleting properties
 - `Resource.delprop(key)` or `Resource.dp(key)`
 - method chaining
-
